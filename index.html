@@ -82,6 +82,14 @@
       <option value="compound">Compound Interest</option>
     </select>
 
+    <label for="frequency">Compounding Frequency (only for CI):</label>
+    <select id="frequency">
+      <option value="1">Annually</option>
+      <option value="4">Quarterly</option>
+      <option value="12">Monthly</option>
+      <option value="365">Daily</option>
+    </select>
+
     <label for="principal">Investment (₹):</label>
     <input type="number" id="principal" value="3000000">
 
@@ -105,24 +113,30 @@
       const rate = parseFloat(document.getElementById("rate").value);
       const months = parseFloat(document.getElementById("time").value);
       const type = document.getElementById("calculationType").value;
+      const frequency = parseInt(document.getElementById("frequency").value);
       const years = months / 12;
 
       let interest = 0;
       let total = 0;
+      let yearsToDouble = 0;
 
       if (type === 'simple') {
         interest = (principal * rate * years) / 100;
         total = principal + interest;
+        yearsToDouble = 100 / rate;
       } else {
-        total = principal * Math.pow((1 + rate / 100), years);
+        total = principal * Math.pow((1 + (rate / 100) / frequency), frequency * years);
         interest = total - principal;
+        yearsToDouble = Math.log(2) / (frequency * Math.log(1 + (rate / 100) / frequency));
       }
 
       document.getElementById("siResult").innerHTML = `
         Type: <strong>${type === 'simple' ? 'Simple Interest' : 'Compound Interest'}</strong><br>
+        Compounding: <strong>${type === 'simple' ? 'N/A' : document.getElementById("frequency").selectedOptions[0].text}</strong><br>
         Interest Earned: <strong>₹${interest.toFixed(2)}</strong><br>
         Final Value: <strong>₹${total.toFixed(2)}</strong><br>
-        Holding Period: <strong>${months} months (${years.toFixed(2)} years)</strong>
+        Holding Period: <strong>${months} months (${years.toFixed(2)} years)</strong><br>
+        Time to Double Money: <strong>${yearsToDouble.toFixed(2)} years</strong>
       `;
 
       const ctx = document.getElementById('interestChart').getContext('2d');
